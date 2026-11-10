@@ -1,0 +1,819 @@
+<ion-header class="uber-header">
+  <ion-toolbar color="dark">
+    <ion-title>UBER<span class="app-azul">APP</span> · Administrador</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">Salir</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="uber-ion-content" [fullscreen]="false">
+
+<div class="admin">
+
+  @if (!tieneAcceso) {
+
+    <div class="sin-acceso">
+      <h2>Acceso administrativo</h2>
+      <p>
+        Debes iniciar sesión con una cuenta de
+        Administrador para acceder a este módulo.
+      </p>
+      <a href="/login">Ir al inicio de sesión</a>
+    </div>
+
+  } @else {
+
+    <!-- ENCABEZADO -->
+
+    <div class="encabezado">
+      <div>
+        <span class="etiqueta">UBER APP · ADMINISTRACIÓN</span>
+        <h1>Panel de administración</h1>
+        <p>
+          Bienvenido, {{ nombreAdmin }}.
+          Controla la operación de la plataforma.
+        </p>
+      </div>
+
+      <span class="insignia">Administrador</span>
+    </div>
+
+    <!-- MENÚ DE SECCIONES -->
+
+    <nav class="menu-admin">
+
+      <button
+        [class.activo]="pestana === 'dashboard'"
+        (click)="cambiarPestana('dashboard')">
+        Resumen
+      </button>
+
+      <button
+        [class.activo]="pestana === 'conductores'"
+        (click)="cambiarPestana('conductores')">
+        Conductores
+      </button>
+
+      <button
+        [class.activo]="pestana === 'tarifas'"
+        (click)="cambiarPestana('tarifas')">
+        Tarifas
+      </button>
+
+      <button
+        [class.activo]="pestana === 'viajes'"
+        (click)="cambiarPestana('viajes')">
+        Viajes
+      </button>
+
+      <button
+        [class.activo]="pestana === 'reportes'"
+        (click)="cambiarPestana('reportes')">
+        Reportes
+      </button>
+
+      <button
+        [class.activo]="pestana === 'auditoria'"
+        (click)="cambiarPestana('auditoria')">
+        Auditoría
+      </button>
+
+    </nav>
+
+    <!-- MENSAJES -->
+
+    @if (mensaje) {
+      <div
+        class="mensaje"
+        [class.exito]="tipoMensaje === 'exito'"
+        [class.error]="tipoMensaje === 'error'">
+
+        <span>{{ mensaje }}</span>
+
+        <button (click)="limpiarMensaje()" type="button">
+          ×
+        </button>
+
+      </div>
+    }
+
+    <!-- DASHBOARD -->
+
+    @if (pestana === 'dashboard') {
+
+      <div class="seccion-titulo">
+        <div>
+          <h2>Resumen general</h2>
+          <p>Indicadores obtenidos desde la API de Laravel.</p>
+        </div>
+
+        <button
+          class="boton secundario"
+          [disabled]="cargandoResumen"
+          (click)="cargarResumen()">
+          Actualizar datos
+        </button>
+      </div>
+
+      @if (cargandoResumen && !estadisticas) {
+        <div class="tarjeta">
+          Consultando estadísticas del servidor...
+        </div>
+      }
+
+      @if (estadisticas; as e) {
+
+        <div class="estadisticas">
+
+          <div class="kpi">
+            <span>Total de clientes</span>
+            <strong>{{ e.total_clients }}</strong>
+            <small>Usuarios registrados</small>
+          </div>
+
+          <div class="kpi">
+            <span>Conductores</span>
+            <strong>{{ e.total_drivers }}</strong>
+            <small>Registros de conductores</small>
+          </div>
+
+          <div class="kpi advertencia">
+            <span>Pendientes de aprobación</span>
+            <strong>{{ e.pending_drivers }}</strong>
+            <small>Conductores por revisar</small>
+          </div>
+
+          <div class="kpi">
+            <span>Conductores aprobados</span>
+            <strong>{{ e.approved_drivers }}</strong>
+            <small>Habilitados por administración</small>
+          </div>
+
+          <div class="kpi">
+            <span>Viajes activos</span>
+            <strong>{{ e.active_trips }}</strong>
+            <small>Servicios en curso</small>
+          </div>
+
+          <div class="kpi">
+            <span>Viajes completados</span>
+            <strong>{{ e.completed_trips }}</strong>
+            <small>Recorridos finalizados</small>
+          </div>
+
+          <div class="kpi">
+            <span>Solicitudes pendientes</span>
+            <strong>{{ e.pending_requests }}</strong>
+            <small>Esperando asignación</small>
+          </div>
+
+          <div class="kpi ingresos">
+            <span>Ingresos registrados</span>
+            <strong>
+              {{ e.total_revenue | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+            <small>Valor reportado por el backend</small>
+          </div>
+
+          <div class="kpi">
+            <span>Viajes cancelados</span>
+            <strong>{{ e.cancelled_trips }}</strong>
+            <small>Solicitudes y viajes cancelados</small>
+          </div>
+
+        </div>
+      }
+
+      <div class="tarjeta destacados">
+
+        <div>
+          <h2>Conductores pendientes</h2>
+          <p>
+            Revisa los registros antes de autorizar
+            nuevos conductores.
+          </p>
+        </div>
+
+        <div class="numero-pendientes">
+          {{ conductoresPendientes.length }}
+        </div>
+
+        <button
+          class="boton principal"
+          (click)="cambiarPestana('conductores')">
+          Gestionar conductores
+        </button>
+
+      </div>
+
+    }
+
+    <!-- CONDUCTORES -->
+
+    @if (pestana === 'conductores') {
+
+      <div class="seccion-titulo">
+        <div>
+          <h2>Gestión de conductores</h2>
+          <p>Aprueba, rechaza y suspende registros.</p>
+        </div>
+
+        <button
+          class="boton secundario"
+          [disabled]="cargandoConductores"
+          (click)="consultarConductores()">
+          Actualizar
+        </button>
+      </div>
+
+      <div class="barra-filtros">
+
+        <label for="filtroConductores">Filtrar por estado:</label>
+
+        <select
+          id="filtroConductores"
+          [(ngModel)]="filtroConductores">
+
+          <option value="todos">Todos</option>
+          <option value="pending">Pendientes</option>
+          <option value="approved">Aprobados</option>
+          <option value="rejected">Rechazados</option>
+          <option value="suspended">Suspendidos</option>
+
+        </select>
+
+        <span>
+          {{ conductoresFiltrados.length }} registros
+        </span>
+
+      </div>
+
+      @if (cargandoConductores) {
+        <p class="texto-cargando">
+          Consultando conductores...
+        </p>
+      }
+
+      <div class="lista-conductores">
+
+        @for (conductor of conductoresFiltrados; track conductor.id) {
+
+          <article class="tarjeta conductor-card">
+
+            <div class="conductor-cabecera">
+
+              <div class="avatar">
+                {{ conductor.user.name.charAt(0) }}
+              </div>
+
+              <div class="identidad">
+                <h3>{{ conductor.user.name }}</h3>
+                <p>{{ conductor.user.email }}</p>
+              </div>
+
+              <span
+                class="estado"
+                [class.pendiente]="conductor.approval_status === 'pending'"
+                [class.aprobado]="conductor.approval_status === 'approved'"
+                [class.rechazado]="conductor.approval_status === 'rejected'"
+                [class.suspendido]="conductor.approval_status === 'suspended'">
+
+                {{ conductor.approval_status }}
+              </span>
+
+            </div>
+
+            <div class="detalles-conductor">
+
+              <div>
+                <span>ID del conductor</span>
+                <strong>{{ conductor.id }}</strong>
+              </div>
+
+              <div>
+                <span>Número de licencia</span>
+                <strong>{{ conductor.license_number }}</strong>
+              </div>
+
+              <div>
+                <span>Calificación</span>
+                <strong>
+                  {{ conductor.rating_average ?? 'Sin calificaciones' }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Vehículos</span>
+                <strong>{{ conductor.vehicles?.length ?? 0 }}</strong>
+              </div>
+
+            </div>
+
+            @if (conductor.vehicles?.length) {
+
+              <div class="vehiculos">
+
+                <h4>Vehículos registrados</h4>
+
+                @for (vehiculo of conductor.vehicles ?? []; track vehiculo.plate) {
+
+                  <div class="vehiculo">
+
+                    <div>
+                      <strong>
+                        {{ vehiculo.brand }} {{ vehiculo.model }}
+                      </strong>
+                      <span>Modelo {{ vehiculo.year }}</span>
+                    </div>
+
+                    <span class="placa">
+                      {{ vehiculo.plate }}
+                    </span>
+
+                  </div>
+
+                }
+
+              </div>
+            }
+
+            <div class="acciones-conductor">
+
+              <label>
+                Observación administrativa
+              </label>
+
+              <textarea
+                [(ngModel)]="notas[conductor.id]"
+                placeholder="Escribe el resultado de la revisión de documentos, licencia y vehículo..."
+                rows="2">
+              </textarea>
+
+              <div class="grupo-botones">
+
+                @if (conductor.approval_status !== 'approved') {
+
+                  <button
+                    class="boton aprobar"
+                    [disabled]="procesandoConductor !== null"
+                    (click)="cambiarAprobacion(conductor, 'approved')">
+                    Aprobar conductor
+                  </button>
+
+                }
+
+                @if (conductor.approval_status === 'pending') {
+
+                  <button
+                    class="boton rechazar"
+                    [disabled]="procesandoConductor !== null"
+                    (click)="cambiarAprobacion(conductor, 'rejected')">
+                    Rechazar
+                  </button>
+
+                }
+
+                @if (conductor.approval_status === 'approved') {
+
+                  <button
+                    class="boton rechazar"
+                    [disabled]="procesandoConductor !== null"
+                    (click)="cambiarAprobacion(conductor, 'suspended')">
+                    Suspender
+                  </button>
+
+                }
+
+              </div>
+
+              @if (procesandoConductor === conductor.id) {
+                <small>Procesando actualización...</small>
+              }
+
+            </div>
+
+          </article>
+
+        } @empty {
+
+          @if (!cargandoConductores) {
+            <div class="vacio">
+              <h3>No hay conductores en esta categoría</h3>
+              <p>Prueba otro filtro o actualiza la consulta.</p>
+            </div>
+          }
+
+        }
+
+      </div>
+
+    }
+
+    <!-- TARIFAS -->
+
+    @if (pestana === 'tarifas') {
+
+      <div class="seccion-titulo">
+        <div>
+          <h2>Administración de tarifas</h2>
+          <p>Consulta y crea configuraciones de precios.</p>
+        </div>
+
+        <button
+          class="boton secundario"
+          [disabled]="cargandoTarifas"
+          (click)="consultarTarifas()">
+          Actualizar tarifas
+        </button>
+      </div>
+
+      <div class="dos-columnas">
+
+        <section class="tarjeta">
+
+          <h3>Tarifas registradas</h3>
+
+          @if (cargandoTarifas) {
+            <p>Consultando tarifas...</p>
+          }
+
+          @for (tarifa of tarifas; track tarifa.id) {
+
+            <div class="tarifa-item">
+
+              <div class="tarifa-cabecera">
+
+                <h4>{{ tarifa.name }}</h4>
+
+                <span
+                  class="estado"
+                  [class.aprobado]="tarifa.active">
+                  {{ tarifa.active ? 'Activa' : 'Inactiva' }}
+                </span>
+
+              </div>
+
+              <div class="fila">
+                <span>Tarifa base</span>
+                <strong>
+                  {{ tarifa.base_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="fila">
+                <span>Por kilómetro</span>
+                <strong>
+                  {{ tarifa.price_per_km | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="fila">
+                <span>Por minuto</span>
+                <strong>
+                  {{ tarifa.price_per_minute | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="fila">
+                <span>Tarifa mínima</span>
+                <strong>
+                  {{ tarifa.minimum_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="fila">
+                <span>Multiplicador</span>
+                <strong>{{ tarifa.surge_multiplier }}x</strong>
+              </div>
+
+            </div>
+
+          } @empty {
+            @if (!cargandoTarifas) {
+              <p>No se encontraron tarifas.</p>
+            }
+          }
+
+        </section>
+
+        <section class="tarjeta">
+
+          <h3>Crear nueva tarifa</h3>
+
+          <p class="descripcion">
+            Una tarifa activa puede modificar los precios
+            utilizados por el backend.
+          </p>
+
+          <form (ngSubmit)="crearTarifa()">
+
+            <div class="campo">
+              <label>Nombre de la tarifa</label>
+              <input
+                name="nombreTarifa"
+                [(ngModel)]="nuevaTarifa.name"
+                placeholder="Ej: Tarifa nocturna"
+                required>
+            </div>
+
+            <div class="campo">
+              <label>Tarifa base (COP)</label>
+              <input
+                name="tarifaBase"
+                type="number"
+                min="0"
+                [(ngModel)]="nuevaTarifa.base_fare"
+                required>
+            </div>
+
+            <div class="campo">
+              <label>Precio por kilómetro (COP)</label>
+              <input
+                name="precioKm"
+                type="number"
+                min="0"
+                [(ngModel)]="nuevaTarifa.price_per_km"
+                required>
+            </div>
+
+            <div class="campo">
+              <label>Precio por minuto (COP)</label>
+              <input
+                name="precioMinuto"
+                type="number"
+                min="0"
+                [(ngModel)]="nuevaTarifa.price_per_minute"
+                required>
+            </div>
+
+            <div class="campo">
+              <label>Tarifa mínima (COP)</label>
+              <input
+                name="tarifaMinima"
+                type="number"
+                min="0"
+                [(ngModel)]="nuevaTarifa.minimum_fare"
+                required>
+            </div>
+
+            <div class="campo">
+              <label>Multiplicador</label>
+              <input
+                name="multiplicador"
+                type="number"
+                min="0.1"
+                step="0.1"
+                [(ngModel)]="nuevaTarifa.surge_multiplier"
+                required>
+            </div>
+
+            <label class="check">
+              <input
+                name="tarifaActiva"
+                type="checkbox"
+                [(ngModel)]="nuevaTarifa.active">
+              Crear como tarifa activa
+            </label>
+
+            <button
+              type="submit"
+              class="boton principal ancho"
+              [disabled]="guardandoTarifa">
+
+              {{
+                guardandoTarifa
+                  ? 'Guardando tarifa...'
+                  : 'Guardar nueva tarifa'
+              }}
+
+            </button>
+
+          </form>
+
+        </section>
+
+      </div>
+
+    }
+
+    <!-- VIAJES -->
+
+    @if (pestana === 'viajes') {
+
+      <div class="seccion-titulo">
+        <div>
+          <h2>Control de viajes</h2>
+          <p>Consulta los servicios registrados en el sistema.</p>
+        </div>
+
+        <button
+          class="boton secundario"
+          [disabled]="cargandoViajes"
+          (click)="consultarViajes()">
+          Actualizar viajes
+        </button>
+      </div>
+
+      <div class="barra-filtros">
+
+        <label for="filtroViajes">Estado del viaje:</label>
+
+        <select
+          id="filtroViajes"
+          [(ngModel)]="filtroViajes"
+          (ngModelChange)="consultarViajes()">
+
+          <option value="todos">Todos</option>
+          <option value="assigned">Asignados</option>
+          <option value="driver_arrived">Conductor llegó</option>
+          <option value="in_progress">En curso</option>
+          <option value="completed">Completados</option>
+          <option value="cancelled">Cancelados</option>
+
+        </select>
+
+      </div>
+
+      <section class="tarjeta">
+
+        @if (cargandoViajes) {
+          <p>Consultando viajes...</p>
+        }
+
+        <div class="tabla-contenedor">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Conductor</th>
+                <th>Estado</th>
+                <th>Tarifa</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              @for (viaje of viajes; track viaje.id) {
+
+                <tr>
+                  <td>#{{ viaje.id }}</td>
+
+                  <td>
+                    {{
+                      viaje.client?.user?.name ||
+                      viaje.client?.name ||
+                      'No disponible'
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      viaje.driver?.user?.name ||
+                      viaje.driver?.name ||
+                      'Sin asignar'
+                    }}
+                  </td>
+
+                  <td>
+                    <span class="estado">
+                      {{ viaje.status }}
+                    </span>
+                  </td>
+
+                  <td>
+                    @if (viaje.final_fare != null) {
+                      {{ viaje.final_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                    } @else if (viaje.estimated_fare != null) {
+                      {{ viaje.estimated_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                    } @else {
+                      No disponible
+                    }
+                  </td>
+
+                  <td>
+                    @if (viaje.completed_at || viaje.created_at) {
+                      {{ (viaje.completed_at || viaje.created_at) | date:'short' }}
+                    } @else {
+                      Sin fecha
+                    }
+                  </td>
+                </tr>
+
+              } @empty {
+
+                @if (!cargandoViajes) {
+                  <tr>
+                    <td colspan="6" class="vacio-tabla">
+                      No se encontraron viajes.
+                    </td>
+                  </tr>
+                }
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    }
+
+    <!-- REPORTES -->
+
+    @if (pestana === 'reportes') {
+
+      <div class="seccion-titulo">
+        <div>
+          <h2>Reportes generales</h2>
+          <p>
+            Información consolidada de ingresos,
+            cancelaciones y desempeño.
+          </p>
+        </div>
+
+        <button
+          class="boton secundario"
+          [disabled]="cargandoReportes"
+          (click)="consultarReportes()">
+          Actualizar reporte
+        </button>
+      </div>
+
+      <section class="tarjeta">
+
+        @if (cargandoReportes) {
+          <p>Generando reporte desde el servidor...</p>
+        }
+
+        @if (reporte !== null) {
+
+          <h3>Respuesta del reporte</h3>
+
+          <p class="descripcion">
+            Información original entregada por
+            el backend Laravel.
+          </p>
+
+          <pre class="json">{{ reporte | json }}</pre>
+
+        } @else if (!cargandoReportes) {
+          <p>No hay información de reportes cargada.</p>
+        }
+
+      </section>
+
+    }
+
+    <!-- AUDITORÍA -->
+
+    @if (pestana === 'auditoria') {
+
+      <div class="seccion-titulo">
+        <div>
+          <h2>Registro de auditoría</h2>
+          <p>
+            Acciones administrativas y eventos
+            registrados por el servidor.
+          </p>
+        </div>
+
+        <button
+          class="boton secundario"
+          [disabled]="cargandoAuditoria"
+          (click)="consultarAuditoria()">
+          Actualizar auditoría
+        </button>
+      </div>
+
+      <section class="tarjeta">
+
+        @if (cargandoAuditoria) {
+          <p>Consultando los registros de auditoría...</p>
+        }
+
+        @if (auditoria !== null) {
+
+          <h3>Eventos registrados</h3>
+
+          <pre class="json">{{ auditoria | json }}</pre>
+
+        } @else if (!cargandoAuditoria) {
+          <p>No hay registros cargados.</p>
+        }
+
+      </section>
+
+    }
+
+  }
+
+</div>
+
+</ion-content>

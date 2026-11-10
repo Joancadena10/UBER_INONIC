@@ -1,0 +1,187 @@
+<ion-content [fullscreen]="true" class="login-ion-content">
+<div class="login-page">
+
+  <section class="presentacion">
+    <div class="contenido-izquierdo">
+
+      <div class="logo">
+        UBER<span>APP</span>
+      </div>
+
+      <div class="texto-principal">
+        <div class="etiqueta">
+          PLATAFORMA DE MOVILIDAD
+        </div>
+
+        <h1>
+          Tu ciudad.<br>
+          Tu camino.<br>
+          <span>Tu Uber.</span>
+        </h1>
+
+        <p>
+          Una plataforma de transporte que conecta
+          pasajeros y conductores de manera sencilla,
+          rápida y segura.
+        </p>
+      </div>
+
+      <div class="caracteristicas">
+        <div class="caracteristica">
+          <div class="icono">01</div>
+          <div>
+            <strong>Solicita viajes</strong>
+            <small>Viaja a donde necesites</small>
+          </div>
+        </div>
+
+        <div class="caracteristica">
+          <div class="icono">02</div>
+          <div>
+            <strong>Conduce con nosotros</strong>
+            <small>Gestiona tus servicios</small>
+          </div>
+        </div>
+
+        <div class="caracteristica">
+          <div class="icono">03</div>
+          <div>
+            <strong>Gestión inteligente</strong>
+            <small>Administración centralizada</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright">
+        © 2026 Uber App · Proyecto académico
+      </div>
+
+    </div>
+  </section>
+
+  <section class="acceso">
+
+    <div class="login-card">
+
+      <div class="encabezado">
+        <div class="icono-login">U</div>
+
+        <h2>Bienvenido de nuevo</h2>
+
+        <p>
+          Ingresa tus credenciales para acceder
+          a tu cuenta.
+        </p>
+      </div>
+
+      <form (ngSubmit)="iniciarSesion()">
+
+        <div class="campo">
+          <label for="correo">
+            Correo electrónico o teléfono
+          </label>
+
+          <ion-input
+            fill="outline"
+            id="correo"
+            name="usuario"
+            type="text"
+            [(ngModel)]="usuario"
+            placeholder="ejemplo@correo.com"
+            autocomplete="username"
+            required
+          ></ion-input>
+        </div>
+
+        <div class="campo">
+          <label for="clave">Contraseña</label>
+
+          <div class="password-container">
+
+            <ion-input
+              fill="outline"
+              id="clave"
+              name="password"
+              [type]="mostrarClave() ? 'text' : 'password'"
+              [(ngModel)]="password"
+              placeholder="Ingresa tu contraseña"
+              autocomplete="current-password"
+              required
+            ></ion-input>
+
+            <button
+              class="mostrar"
+              type="button"
+              (click)="mostrarClave.set(!mostrarClave())"
+            >
+              {{ mostrarClave() ? 'Ocultar' : 'Ver' }}
+            </button>
+
+          </div>
+        </div>
+
+        @if (error()) {
+          <div class="mensaje-error">
+            {{ error() }}
+          </div>
+        }
+
+        <ion-button
+          expand="block"
+          color="dark"
+          class="boton-ingresar"
+          type="submit"
+          [disabled]="cargando() || !usuario || !password"
+        >
+          {{ cargando() ? 'Verificando acceso...' : 'Iniciar sesión →' }}
+        </ion-button>
+
+      </form>
+
+      <div class="separador">
+        <span>Accede según tu perfil</span>
+      </div>
+
+      <div class="roles">
+        <div class="rol">
+          <span>Cliente</span>
+        </div>
+
+        <div class="rol">
+          <span>Conductor</span>
+        </div>
+
+        <div class="rol">
+          <span>Administrador</span>
+        </div>
+      </div>
+
+      <p class="nota">
+        Tu perfil se identifica automáticamente
+        al iniciar sesión.
+      </p>
+
+      <div class="demo">
+        <h4>Vista previa del proyecto</h4>
+        <p>
+          Explora las interfaces sin iniciar sesión.
+          No se muestran datos reales.
+        </p>
+
+        <div class="demo-enlaces">
+          <a routerLink="/cliente">Cliente</a>
+          <a routerLink="/conductor">Conductor</a>
+          <a routerLink="/administrador">Administrador</a>
+        </div>
+      </div>
+
+      <p class="pie">
+        Plataforma académica de gestión de transporte
+      </p>
+
+    </div>
+
+  </section>
+
+</div>
+</ion-content>

@@ -1,0 +1,359 @@
+<ion-header class="uber-header">
+  <ion-toolbar color="dark">
+    <ion-title>UBER<span class="app-azul">APP</span> · Conductor</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">Salir</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="uber-ion-content" [fullscreen]="false">
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar solicitudes"></ion-refresher-content>
+  </ion-refresher>
+
+<div class="panel-conductor">
+
+  @if (!tieneAcceso) {
+
+    <div class="tarjeta acceso">
+      <h2>Acceso para conductores</h2>
+      <p>
+        Debes iniciar sesión con una cuenta de conductor
+        para consultar solicitudes y administrar viajes.
+      </p>
+      <a href="/login" class="enlace">Ir a iniciar sesión</a>
+    </div>
+
+  } @else {
+
+    <div class="cabecera">
+      <div>
+        <span class="etiqueta">UBER · CONDUCTOR</span>
+        <h1>Hola, {{ nombre }}</h1>
+        <p>Gestiona tu disponibilidad y servicios de transporte.</p>
+      </div>
+
+      <span class="estado"
+        [class.disponible]="disponibilidad === 'available'">
+        {{
+          disponibilidad === 'available'
+            ? 'Disponible'
+            : disponibilidad === 'unavailable'
+              ? 'Desconectado'
+              : 'Estado sin consultar'
+        }}
+      </span>
+    </div>
+
+    @if (mensaje) {
+      <div class="mensaje"
+           [class.exito]="tipoMensaje === 'exito'"
+           [class.error]="tipoMensaje === 'error'">
+        {{ mensaje }}
+      </div>
+    }
+
+    <div class="resumen">
+
+      <section class="tarjeta">
+        <span class="descripcion">Estado del conductor</span>
+        <h2>Disponibilidad</h2>
+
+        <div class="acciones">
+          <ion-button
+            color="dark"
+            class="boton oscuro"
+            [disabled]="cambiandoDisponibilidad || procesandoViaje"
+            (click)="cambiarDisponibilidad('available')">
+            Activar servicio
+          </ion-button>
+
+          <ion-button
+            color="medium"
+            fill="outline"
+            class="boton claro"
+            [disabled]="cambiandoDisponibilidad || procesandoViaje"
+            (click)="cambiarDisponibilidad('unavailable')">
+            Desconectarme
+          </ion-button>
+        </div>
+
+        <p class="nota">
+          Para recibir servicios debes estar aprobado
+          por el administrador.
+        </p>
+      </section>
+
+      <section class="tarjeta">
+        <span class="descripcion">Solicitudes recibidas</span>
+        <h2>{{ solicitudes.length }}</h2>
+        <p>Solicitudes disponibles en la última consulta.</p>
+
+        <button
+          class="boton claro"
+          [disabled]="cargandoSolicitudes"
+          (click)="consultarSolicitudes()">
+          {{
+            cargandoSolicitudes
+              ? 'Consultando...'
+              : 'Actualizar solicitudes'
+          }}
+        </button>
+      </section>
+
+    </div>
+
+    <div class="distribucion">
+
+      <div class="columna">
+
+        <section class="tarjeta">
+
+          <div class="titulo">
+            <div>
+              <h2>Solicitudes de viaje</h2>
+              <p>Servicios pendientes de asignación.</p>
+            </div>
+          </div>
+
+          @if (cargandoSolicitudes) {
+            <p>Consultando solicitudes del servidor...</p>
+          } @else {
+
+            @for (solicitud of solicitudes; track solicitud.id) {
+
+              <div class="solicitud">
+
+                <div class="solicitud-superior">
+                  <strong>Solicitud #{{ solicitud.id }}</strong>
+                  <span class="etiqueta-precio">
+                    {{ solicitud.estimated_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </span>
+                </div>
+
+                <div class="ruta">
+                  <div>
+                    <span class="punto verde"></span>
+                    <span>{{ solicitud.origin_name }}</span>
+                  </div>
+
+                  <div>
+                    <span class="punto negro"></span>
+                    <span>{{ solicitud.destination_name }}</span>
+                  </div>
+                </div>
+
+                <p class="detalle">
+                  Distancia estimada:
+                  {{ solicitud.estimated_distance_km }} km
+                </p>
+
+                @if (solicitud.client) {
+                  <p class="detalle">
+                    Cliente: {{ solicitud.client.name }}
+                  </p>
+                }
+
+                <ion-button
+                  color="dark"
+                  class="boton oscuro"
+                  [disabled]="procesandoViaje || (viaje !== null && viaje.status !== 'completed')"
+                  (click)="aceptarSolicitud(solicitud.id)">
+                  {{ procesandoViaje ? 'Procesando...' : 'Aceptar viaje' }}
+                </ion-button>
+
+              </div>
+
+            } @empty {
+              <div class="vacio">
+                <h3>Sin solicitudes pendientes</h3>
+                <p>Actualiza para consultar nuevos servicios.</p>
+              </div>
+            }
+          }
+
+        </section>
+
+        <section class="tarjeta">
+
+          <div class="titulo">
+            <div>
+              <h2>Viaje actual</h2>
+              <p>Gestiona las etapas del recorrido.</p>
+            </div>
+          </div>
+
+          @if (viaje) {
+
+            <div class="viaje-detalle">
+              <div>
+                <span>Identificador del viaje</span>
+                <strong>#{{ viaje.id }}</strong>
+              </div>
+
+              <div>
+                <span>Estado</span>
+                <strong>{{ viaje.status }}</strong>
+              </div>
+
+              @if (viaje.estimated_fare != null) {
+                <div>
+                  <span>Tarifa estimada</span>
+                  <strong>
+                    {{ viaje.estimated_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </strong>
+                </div>
+              }
+            </div>
+
+            @if (viaje.status === 'assigned') {
+              <ion-button
+                color="dark"
+                class="boton oscuro"
+                [disabled]="procesandoViaje"
+                (click)="actualizarViaje('arrive')">
+                Registrar llegada al origen
+              </ion-button>
+            }
+
+            @if (viaje.status === 'driver_arrived') {
+              <ion-button
+                color="dark"
+                class="boton oscuro"
+                [disabled]="procesandoViaje"
+                (click)="actualizarViaje('start')">
+                Iniciar recorrido
+              </ion-button>
+            }
+
+            @if (viaje.status === 'in_progress') {
+
+              <h3>Finalizar recorrido</h3>
+
+              <div class="campos">
+                <div>
+                  <label>Distancia real (km)</label>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    [(ngModel)]="distanciaReal"
+                    placeholder="Ej: 5.2">
+                </div>
+
+                <div>
+                  <label>Duración real (min)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    [(ngModel)]="duracionReal"
+                    placeholder="Ej: 15">
+                </div>
+              </div>
+
+              <ion-button
+                color="dark"
+                class="boton oscuro"
+                [disabled]="procesandoViaje"
+                (click)="actualizarViaje('complete')">
+                Finalizar viaje
+              </ion-button>
+            }
+
+            @if (viaje.status === 'completed') {
+              <div class="completado">
+                Viaje finalizado correctamente.
+
+                @if (viaje.final_fare != null) {
+                  <p>
+                    Tarifa final:
+                    {{ viaje.final_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </p>
+                }
+              </div>
+            }
+
+          } @else {
+            <div class="vacio">
+              <h3>No hay un viaje seleccionado</h3>
+              <p>Acepta una solicitud para gestionar su recorrido.</p>
+            </div>
+          }
+
+        </section>
+
+      </div>
+
+      <aside class="columna">
+
+        <section class="tarjeta">
+
+          <div class="titulo">
+            <div>
+              <h2>Mi ubicación GPS</h2>
+              <p>Ubicación compartida con la plataforma.</p>
+            </div>
+          </div>
+
+          <div class="mapa" #mapaConductor></div>
+
+          <div class="acciones gps-acciones">
+            <button
+              class="boton oscuro"
+              [disabled]="gpsActivo"
+              (click)="iniciarGPS()">
+              Activar GPS
+            </button>
+
+            <button
+              class="boton claro"
+              [disabled]="!gpsActivo"
+              (click)="detenerGPS()">
+              Detener GPS
+            </button>
+          </div>
+
+          <div class="coordenadas">
+            <div>
+              <span>Latitud</span>
+              <strong>{{ latitud ?? 'Sin ubicación' }}</strong>
+            </div>
+
+            <div>
+              <span>Longitud</span>
+              <strong>{{ longitud ?? 'Sin ubicación' }}</strong>
+            </div>
+
+            <div>
+              <span>Última lectura</span>
+              <strong>{{ ultimaActualizacion || 'Sin datos' }}</strong>
+            </div>
+
+            <div>
+              <span>Seguimiento</span>
+              <strong>
+                {{ gpsActivo ? 'Activado' : 'Detenido' }}
+              </strong>
+            </div>
+          </div>
+
+          <p class="nota">
+            El GPS se activa con tu autorización. Mientras
+            esté activo, la aplicación intentará enviar
+            nuevas ubicaciones a Laravel, aproximadamente
+            cada 10 segundos como máximo, cuando el navegador
+            proporcione una nueva lectura.
+          </p>
+
+        </section>
+
+      </aside>
+
+    </div>
+
+  }
+
+</div>
+
+</ion-content>

@@ -1,0 +1,41 @@
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  --ion-font-family: Arial, Helvetica, sans-serif;
+  --ion-background-color: #f5f6f8;
+  --ion-text-color: #111827;
+  --ion-color-primary: #111827;
+  --ion-color-primary-contrast: #ffffff;
+}
+
+html, body, app-root, ion-app { height: 100%; }
+body { margin: 0; }
+.uber-ion-content { --background: #f5f6f8; }
+.login-ion-content { --background: #f5f6f8; }
+.uber-header ion-title { font-weight: 800; font-size: 17px; }
+.app-azul { color: #6bc3ff; }
+.uber-ion-content .cliente,
+.uber-ion-content .panel-conductor,
+.uber-ion-content .admin {
+  max-width: 1200px;
+  padding: 24px 18px 90px;
+  margin: auto;
+}
+.uber-ion-content ion-button { text-transform: none; --border-radius: 9px; font-weight: 700; }
+.uber-ion-content .leaflet-container { z-index: 0; }
+@media (max-width: 600px) {
+  .uber-header ion-title { font-size: 15px; }
+  .uber-ion-content .cliente,
+  .uber-ion-content .panel-conductor,
+  .uber-ion-content .admin { padding: 18px 12px 80px; }
+  .uber-ion-content .acciones ion-button { min-height: 46px; }
+}

@@ -1,0 +1,319 @@
+<ion-header class="uber-header">
+  <ion-toolbar color="dark">
+    <ion-title>UBER<span class="app-azul">APP</span> · Cliente</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">Salir</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="uber-ion-content" [fullscreen]="false">
+
+<div class="cliente">
+
+  <div class="encabezado">
+    <div>
+      <span class="etiqueta">UBER · CLIENTE</span>
+      <h1>¿A dónde vamos hoy?</h1>
+      <p>Selecciona tu destino y solicita un conductor.</p>
+    </div>
+    <span class="indicador">Mapa interactivo</span>
+  </div>
+
+  <div class="distribucion">
+
+    <div class="columna-principal">
+
+      <section class="tarjeta">
+
+        <div class="titulo-seccion">
+          <div>
+            <h2>Tu recorrido</h2>
+            <p>Selecciona origen y destino sobre el mapa.</p>
+          </div>
+        </div>
+
+        <div class="herramientas">
+
+          <button
+            type="button"
+            class="opcion"
+            [class.seleccionada]="seleccion === 'origen'"
+            (click)="seleccionar('origen')">
+            <span class="punto verde"></span>
+            Marcar origen
+          </button>
+
+          <button
+            type="button"
+            class="opcion"
+            [class.seleccionada]="seleccion === 'destino'"
+            (click)="seleccionar('destino')">
+            <span class="punto negro"></span>
+            Marcar destino
+          </button>
+
+          <button
+            type="button"
+            class="opcion gps"
+            [disabled]="cargandoGPS"
+            (click)="usarMiUbicacion()">
+            {{ cargandoGPS ? 'Obteniendo GPS...' : 'Usar mi ubicación GPS' }}
+          </button>
+
+        </div>
+
+        <div class="mapa" #mapaContenedor></div>
+
+        <div class="mapa-leyenda">
+          <span>
+            <i class="punto verde"></i> Recogida
+          </span>
+          <span>
+            <i class="punto negro"></i> Destino
+          </span>
+          <span>Línea punteada: referencia directa</span>
+        </div>
+
+      </section>
+
+      <section class="tarjeta">
+
+        <div class="titulo-seccion">
+          <div>
+            <h2>Solicitar transporte</h2>
+            <p>Verifica los datos antes de confirmar.</p>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="origen">Punto de recogida</label>
+          <input
+            id="origen"
+            type="text"
+            [(ngModel)]="origen"
+            (ngModelChange)="invalidarEstimacion()"
+            placeholder="Ej: Parque Santander, Neiva">
+        </div>
+
+        <div class="campo">
+          <label for="destino">Destino</label>
+          <input
+            id="destino"
+            type="text"
+            [(ngModel)]="destino"
+            (ngModelChange)="invalidarEstimacion()"
+            placeholder="Ej: Centro Comercial San Juan Plaza">
+        </div>
+
+        <h3>Coordenadas del origen</h3>
+
+        <div class="coordenadas">
+
+          <div class="campo">
+            <label for="origenLat">Latitud</label>
+            <input
+              id="origenLat"
+              type="number"
+              step="any"
+              [(ngModel)]="origenLat"
+              (ngModelChange)="cambioCoordenadas()">
+          </div>
+
+          <div class="campo">
+            <label for="origenLng">Longitud</label>
+            <input
+              id="origenLng"
+              type="number"
+              step="any"
+              [(ngModel)]="origenLng"
+              (ngModelChange)="cambioCoordenadas()">
+          </div>
+
+        </div>
+
+        <h3>Coordenadas del destino</h3>
+
+        <div class="coordenadas">
+
+          <div class="campo">
+            <label for="destinoLat">Latitud</label>
+            <input
+              id="destinoLat"
+              type="number"
+              step="any"
+              [(ngModel)]="destinoLat"
+              (ngModelChange)="cambioCoordenadas()">
+          </div>
+
+          <div class="campo">
+            <label for="destinoLng">Longitud</label>
+            <input
+              id="destinoLng"
+              type="number"
+              step="any"
+              [(ngModel)]="destinoLng"
+              (ngModelChange)="cambioCoordenadas()">
+          </div>
+
+        </div>
+
+        <p class="nota">
+          Los nombres de los lugares se escriben manualmente.
+          El mapa selecciona sus coordenadas GPS.
+        </p>
+
+        <button
+          type="button"
+          class="boton-principal"
+          [disabled]="calculando || solicitando"
+          (click)="calcularViaje()">
+          {{ calculando ? 'Calculando tarifa...' : 'Calcular precio del viaje' }}
+        </button>
+
+        @if (estimacion) {
+
+          <div class="estimacion">
+
+            <span>Precio estimado del recorrido</span>
+
+            <div class="precio">
+              {{ estimacion.estimated_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+              <small>COP</small>
+            </div>
+
+            <div class="datos-estimacion">
+              <div>
+                <span>Distancia estimada</span>
+                <strong>{{ estimacion.distance_km }} km</strong>
+              </div>
+
+              <div>
+                <span>Tiempo estimado</span>
+                <strong>{{ estimacion.duration_min }} min</strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="boton-principal"
+              [disabled]="solicitando"
+              (click)="solicitarViaje()">
+              {{ solicitando ? 'Enviando solicitud...' : 'Confirmar y solicitar conductor' }}
+            </button>
+
+          </div>
+        }
+
+        @if (mensaje) {
+          <div
+            class="mensaje"
+            [class.exito]="tipoMensaje === 'exito'"
+            [class.error]="tipoMensaje === 'error'">
+            {{ mensaje }}
+
+            @if (solicitudId !== null) {
+              <p>Solicitud registrada: #{{ solicitudId }}</p>
+            }
+          </div>
+        }
+
+      </section>
+
+    </div>
+
+    <aside class="columna-lateral">
+
+      <section class="tarjeta">
+
+        <div class="titulo-seccion">
+          <div>
+            <h2>Tarifas del servicio</h2>
+            <p>Precios obtenidos desde Laravel.</p>
+          </div>
+        </div>
+
+        @if (cargandoTarifa) {
+          <p>Consultando tarifas...</p>
+        }
+
+        @if (tarifa) {
+
+          <h3>{{ tarifa.name }}</h3>
+
+          <div class="fila">
+            <span>Tarifa base</span>
+            <strong>
+              {{ tarifa.base_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+          <div class="fila">
+            <span>Precio por kilómetro</span>
+            <strong>
+              {{ tarifa.price_per_km | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+          <div class="fila">
+            <span>Precio por minuto</span>
+            <strong>
+              {{ tarifa.price_per_minute | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+          <div class="fila destacado">
+            <span>Tarifa mínima</span>
+            <strong>
+              {{ tarifa.minimum_fare | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+        }
+
+        @if (errorTarifa) {
+          <p class="mensaje error">{{ errorTarifa }}</p>
+        }
+
+        <button
+          type="button"
+          class="boton-secundario"
+          [disabled]="cargandoTarifa"
+          (click)="consultarTarifa()">
+          Actualizar tarifas
+        </button>
+
+      </section>
+
+      <section class="tarjeta informacion">
+
+        <h2>Estado del proyecto</h2>
+
+        <div class="fila">
+          <span>API REST</span>
+          <strong>Laravel</strong>
+        </div>
+
+        <div class="fila">
+          <span>Mapas</span>
+          <strong>OpenStreetMap</strong>
+        </div>
+
+        <div class="fila">
+          <span>Geolocalización</span>
+          <strong>GPS del navegador</strong>
+        </div>
+
+        <p class="nota">
+          La disponibilidad del conductor y el seguimiento
+          del viaje se integrarán en la siguiente etapa.
+        </p>
+
+      </section>
+
+    </aside>
+
+  </div>
+
+</div>
+
+</ion-content>

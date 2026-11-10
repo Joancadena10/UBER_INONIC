@@ -1,0 +1,354 @@
+* {
+  box-sizing: border-box;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-family: Arial, sans-serif;
+}
+
+/* PRESENTACIÓN IZQUIERDA */
+
+.presentacion {
+  background: linear-gradient(145deg, #090909, #202020);
+  color: white;
+  padding: 55px 9%;
+  display: flex;
+}
+
+.contenido-izquierdo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 29px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  color: #67c1ff;
+}
+
+.texto-principal {
+  margin: 65px 0;
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: 10px 14px;
+  background: #ffffff15;
+  border: 1px solid #ffffff25;
+  border-radius: 30px;
+  color: #ccc;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.texto-principal h1 {
+  font-size: clamp(45px, 5vw, 76px);
+  line-height: 1.08;
+  letter-spacing: -3px;
+  margin: 25px 0;
+  font-weight: 800;
+}
+
+.texto-principal h1 span {
+  color: #68c3ff;
+}
+
+.texto-principal p {
+  max-width: 430px;
+  font-size: 17px;
+  line-height: 1.8;
+  color: #aaa;
+}
+
+.caracteristicas {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-bottom: 50px;
+}
+
+.caracteristica {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+
+.icono {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff12;
+  border: 1px solid #ffffff20;
+  border-radius: 12px;
+  color: #68c3ff;
+  font-weight: 700;
+}
+
+.caracteristica strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.caracteristica small {
+  color: #999;
+  font-size: 13px;
+}
+
+.copyright {
+  color: #777;
+  font-size: 12px;
+}
+
+/* FORMULARIO DERECHO */
+
+.acceso {
+  background: #f5f6f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 25px;
+}
+
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 490px;
+  padding: 45px;
+  border-radius: 22px;
+  box-shadow: 0 15px 60px #0000000a;
+}
+
+.icono-login {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  background: #111;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 900;
+  margin-bottom: 25px;
+}
+
+.encabezado h2 {
+  font-size: 29px;
+  letter-spacing: -1px;
+  margin: 0 0 12px;
+  color: #111;
+}
+
+.encabezado p {
+  color: #777;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.campo {
+  margin-bottom: 21px;
+}
+
+.campo label {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.campo input {
+  width: 100%;
+  padding: 15px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+  background: white;
+}
+
+.campo input:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px #11111112;
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-container input {
+  padding-right: 80px;
+}
+
+.mostrar {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 13px;
+  padding: 8px;
+}
+
+.boton-ingresar {
+  width: 100%;
+  padding: 17px;
+  margin-top: 8px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.boton-ingresar:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.boton-ingresar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.mensaje-error {
+  background: #fff1f1;
+  color: #b91c1c;
+  padding: 13px;
+  border-radius: 9px;
+  margin: 15px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.separador {
+  margin: 28px 0 20px;
+  text-align: center;
+  position: relative;
+}
+
+.separador span {
+  color: #888;
+  font-size: 12px;
+}
+
+.roles {
+  display: flex;
+  gap: 9px;
+}
+
+.rol {
+  flex: 1;
+  text-align: center;
+  padding: 13px 5px;
+  border: 1px solid #e5e5e5;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.nota {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 17px;
+}
+
+.demo {
+  background: #f6f7f9;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 28px;
+}
+
+.demo h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.demo p {
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.demo-enlaces {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.demo-enlaces a {
+  background: white;
+  border: 1px solid #ddd;
+  color: #111;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.demo-enlaces a:hover {
+  background: #111;
+  color: white;
+}
+
+.pie {
+  font-size: 11px;
+  color: #aaa;
+  text-align: center;
+  margin-top: 26px;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .presentacion {
+    display: none;
+  }
+
+  .acceso {
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 500px) {
+  .login-card {
+    padding: 28px 22px;
+  }
+
+  .roles {
+    flex-wrap: wrap;
+  }
+}
+/* Campos nativos Ionic: accesibles y cómodos para pantallas táctiles. */
+.campo ion-input { --background: #e8f0ff; --color: #101827; --padding-start: 12px; --padding-end: 12px; --border-radius: 9px; width: 100%; min-height: 49px; }
+.password-container ion-input { flex: 1; min-width: 0; }
+.login-card ion-button.boton-ingresar { --background: #111; --color: white; --border-radius: 9px; margin-top: 20px; min-height: 52px; }
+@media(max-width: 900px) { .login-page { min-height: 100%; } .acceso { min-height: 100%; } }

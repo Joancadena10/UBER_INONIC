@@ -1,0 +1,7 @@
+{
+  "name": "UBER APP",
+  "type": "angular",
+  "integrations": {
+    "capacitor": {}
+  }
+}
